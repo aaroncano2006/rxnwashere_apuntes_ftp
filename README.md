@@ -9,7 +9,7 @@
 5. [Forzar Modo Activo o Pasivo](#5-forzar-modo-activo-o-pasivo)
 6. [Usuarios Anónimos](#6-usuarios-anónimos)
 7. [Enjaular (Chroot) Usuarios FTP](#7-enjaular-chroot-usuarios-ftp)
-8. [Excepciones a la Cárcel (chroot_list)](#8-excepciones-a-la-cárcel-chroot_list)
+8. [Excepciones a la jaula (chroot_list)](#8-excepciones-a-la-jaula-chroot_list)
 9. [Userdir + Apache + FTP](#9-userdir--apache--ftp)
 10. [Conexión Gráfica con FileZilla](#10-conexión-gráfica-con-filezilla)
 11. [Conexión Segura con SFTP](#11-conexión-segura-con-sftp)

@@ -375,7 +375,7 @@ code {
 <li><a href="#5-forzar-modo-activo-o-pasivo">Forzar Modo Activo o Pasivo</a></li>
 <li><a href="#6-usuarios-an%C3%B3nimos">Usuarios Anónimos</a></li>
 <li><a href="#7-enjaular-chroot-usuarios-ftp">Enjaular (Chroot) Usuarios FTP</a></li>
-<li><a href="#8-excepciones-a-la-c%C3%A1rcel-chroot_list">Excepciones a la Cárcel (chroot_list)</a></li>
+<li><a href="#8-excepciones-a-la-jaula-chroot_list">Excepciones a la Cárcel (chroot_list)</a></li>
 <li><a href="#9-userdir--apache--ftp">Userdir + Apache + FTP</a></li>
 <li><a href="#10-conexi%C3%B3n-gr%C3%A1fica-con-filezilla">Conexión Gráfica con FileZilla</a></li>
 <li><a href="#11-conexi%C3%B3n-segura-con-sftp">Conexión Segura con SFTP</a></li>
@@ -489,7 +489,7 @@ sudo chmod 777 /srv/ftp/upload
 </div></code></pre>
 <p><strong>Aspecto importante</strong>:</p>
 <p>El propietario de la raiz del usuario anónimo por defecto es <strong>root</strong>, se puede cambiar con directivas pero es un agujero de seguridad, por lo tanto, si queremos que se puedan subir archivos a la raíz del usuario anónimo lo mejor es crear un directorio como hemos visto anteriormente.</p>
-<h1 id="7-enjaular-usuarios-ftp">7. Enjaular usuarios FTP</h1>
+<h1 id="7-enjaular-chroot-usuarios-ftp">7. Enjaular usuarios FTP</h1>
 <p>“Enjaular” significa que un usuario <strong>no puede salir de su /home</strong> y la ve como si fuera <code>/</code>.</p>
 <pre class="hljs"><code><div>chroot_local_user=YES
 </div></code></pre>
@@ -497,7 +497,7 @@ sudo chmod 777 /srv/ftp/upload
 <p><img src="imgs/03.png" alt="alt text"></p>
 <p><strong>Problema habitual:</strong></p>
 <p>El directorio home no puede ser escribible por seguridad, así que se debe crear una subcarpeta para subir archivos.</p>
-<h1 id="8-excepciones-a-la-jaula-chrootlist">8. Excepciones a la jaula (chroot_list)</h1>
+<h1 id="8-excepciones-a-la-jaula-chroot_list">8. Excepciones a la jaula (chroot_list)</h1>
 <p>Crear archivo (o editar si ya existe o ya se ha creado previamente):</p>
 <pre class="hljs"><code><div>/etc/vsftpd.chroot_list
 </div></code></pre>
