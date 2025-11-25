@@ -248,7 +248,18 @@ Para utilizarlo tenemos que instalarlo en la máquina cliente:
 sudo apt install filezilla
 ```
 
+Cuando abramos FileZilla veremos los siguientes campos para conectarnos con el servidor:
 
+- Servidor (IP del servidor a conectarnos)
+- Nombre de usuario (Nombre de usuario existente en el servidor)
+- Contraseña (Contraseña del usuario)
+- Puerto (Puedes especificar un puerto si lo deseas, por defecto usa el 21 y para SFTP puedes utilizar el 22).
+
+**Ejemplo de conexión con FileZilla**:
+
+![alt text](imgs/04.png)
+
+En este caso nos hemos conectado con un usuario que no está enjaulado, por eso podemos ver todo el sistema de archivos del servidor.
 
 # 11. Conexión Segura con SFTP
 
@@ -260,8 +271,7 @@ Notas importantes:
 
 * **No usa FTP**, sino SSH.
 * Todo el tráfico va cifrado.
-* Wireshark lo identifica como SSH, no como FTP.
-
+* Si escaneamos la red con un sniffer (ej.: Wireshark) lo identifica como SSH, no como FTP.
 
 # 12. Enjaular Usuarios SFTP con SSH
 
