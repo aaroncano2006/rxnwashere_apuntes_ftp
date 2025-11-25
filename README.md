@@ -11,13 +11,10 @@
 7. [Enjaular (Chroot) Usuarios FTP](#7-enjaular-chroot-usuarios-ftp)
 8. [Excepciones a la Cárcel (chroot_list)](#8-excepciones-a-la-cárcel-chroot_list)
 9. [Userdir + Apache + FTP](#9-userdir--apache--ftp)
-10. [VirtualHosts con Apache y FTP](#10-virtualhosts-con-apache-y-ftp)
-11. [Conexión Gráfica con FileZilla](#11-conexión-gráfica-con-filezilla)
-12. [Conexión Segura con SFTP](#12-conexión-segura-con-sftp)
-13. [Enjaular Usuarios SFTP con SSH](#13-enjaular-usuarios-sftp-con-ssh)
-14. [Directivas Importantes de VSFTPD](#14-directivas-importantes-de-vsftpd)
-15. [Enlaces de Interés](#15-enlaces-de-interés)
-
+10. [Conexión Gráfica con FileZilla](#10-conexión-gráfica-con-filezilla)
+11. [Conexión Segura con SFTP](#11-conexión-segura-con-sftp)
+12. [Enjaular Usuarios SFTP con SSH](#12-enjaular-usuarios-sftp-con-ssh)
+13. [Enlaces de Interés](#13-enlaces-de-interés)
 
 # 1. Introducción a FTP
 
@@ -25,18 +22,18 @@ FTP (**File Transfer Protocol**) es uno de los protocolos más antiguos para tra
 
 Características principales:
 
-* No es seguro: el usuario y la contraseña viajan en texto plano.
-* Usa **dos canales**:
+* **No es seguro**: el usuario y la contraseña viajan en texto plano.
 
+* Usa **dos canales**:
   * Canal **de control** (comandos)
   * Canal **de datos** (transferencias)
+
 * Funciona en **modo activo** o **modo pasivo**
 
 Se usa habitualmente para:
-✔ Servidores web
-✔ Servidores internos
-✔ Acceso rápido a carpetas de usuario
-
+- ✔ Servidores web
+- ✔ Servidores internos
+- ✔ Acceso rápido a carpetas de usuario
 
 # 2. Modos de Transferencia: Activo y Pasivo
 
@@ -46,17 +43,20 @@ Se usa habitualmente para:
 * El servidor abre una conexión de datos desde **el puerto 20** hacia un puerto aleatorio del cliente
 * Si el cliente está detrás de un firewall → **suele fallar**
 
-Esto te pasó en tu práctica: el firewall del cliente bloqueaba la conexión y tuviste que desactivarlo temporalmente.
+**Ejemplo**:
+
+![get con modo activo](imgs/02.png)
+
 
 ### 🟢 Modo Pasivo (PASV)
 
 * Cliente se conecta al servidor por **21**
 * El servidor le responde con un puerto aleatorio (>1024)
-* El cliente se conecta **al servidor**, no al revés
-* Mucho más compatible con firewalls y NAT
+* Es el modo recomendado.
 
-Es el modo recomendado.
+**Ejemplo**:
 
+![get con modo pasivo](imgs/01.png)
 
 # 3. Instalación y Funcionamiento de VSFTPD
 
@@ -66,12 +66,30 @@ sudo systemctl enable --now vsftpd
 sudo systemctl status vsftpd
 ```
 
-Puertos típicos:
+**Puertos típicos:**
 
 * **21** → Control
 * **20** → Datos en modo activo
 * **>1024** → Datos en modo pasivo
 
+**Descarga y subida de archivos**:
+
+<code>get &lt;nombre/ruta-archivo&gt;</code> --> Coge un archivo del servidor y lo descarga en el cliente.
+
+<code>put &lt;nombre/ruta-archivo&gt;</code> --> Envia un archivo desde el cliente hasta el servidor.
+
+**Entorno de los comandos**:
+
+Otro aspecto a tener encuenta cuando utilizamos FTP es el entorno de los comandos, depende de como se escriban se ejecutaran en el lado del servidor o del cliente:
+
+- <code>!ls</code> --> Esto se ejecuta en el cliente.
+- <code>ls</code> --> Esto se ejecuta en el servidor.
+
+Con el carácter <code>!</code> podemos ejecutar comandos en el cliente mientras estamos conectados por FTP.
+
+**Excecpión**:
+
+Esto no aplica para los comandos <code>**get**</code> y <code>**put**</code>.
 
 # 4. Configuración General de VSFTPD
 
@@ -84,7 +102,8 @@ Archivo principal:
 Parámetros básicos:
 
 ```conf
-listen=YES
+listen=YES/NO
+listen_ipv6=YES/NO
 anonymous_enable=NO
 local_enable=YES
 write_enable=YES
@@ -121,10 +140,10 @@ Al configurar el modo pasivo podemos limitar los puertos que se utilizan, la ún
 ## Habilitar acceso anónimo
 
 ```conf
-anonymous_enable=YES
-write_enable=YES
-anon_upload_enable=YES
-anon_mkdir_write_enable=NO
+anonymous_enable=YES → Habilitem l’accés al servidor per a usuaris anònims.
+write_enable=YES → Donem permisos d’escriptura, si no no deixa pujar fitxers.
+anon_mkdir_write_enable=NO → No li donem permisos per crear directoris.
+anon_upload_enable=YES → Li donem permisos per pujar fitxers.
 ```
 
 La raíz por defecto del usuario anonymous es **<code>/srv/ftp</code>**.
@@ -136,26 +155,29 @@ sudo mkdir /srv/ftp/upload
 sudo chmod 777 /srv/ftp/upload
 ```
 
-Puedes cambiar la home del usuario anónimo:
+También puedes cambiar la home del usuario anónimo:
 
 ```conf
 anon_root=/srv/ftp/public
 ```
 
-# 7. Enjaular (Chroot) Usuarios FTP
+**Aspecto importante**:
+
+El propietario de la raiz del usuario anónimo por defecto es **root**, se puede cambiar con directivas pero es un agujero de seguridad, por lo tanto, si queremos que se puedan subir archivos a la raíz del usuario anónimo lo mejor es crear un directorio como hemos visto anteriormente.
+
+# 7. Enjaular usuarios FTP
 
 “Enjaular” significa que un usuario **no puede salir de su /home** y la ve como si fuera `/`.
 
 ```conf
 chroot_local_user=YES
-allow_writeable_chroot=YES
 ```
 
-Problema habitual:
+**Problema habitual:**
+
 El directorio home no puede ser escribible por seguridad, así que se debe crear una subcarpeta para subir archivos.
 
-
-# 8. Excepciones a la Cárcel (chroot_list)
+# 8. Excepciones a la jaula (chroot_list)
 
 Crear archivo (o editar si ya existe o ya se ha creado previamente):
 
@@ -173,7 +195,7 @@ chroot_list_file=/etc/vsftpd.chroot_list
 
 Los usuarios listados en este archivo **NO estarán enjaulados**.
 
-Ejemplo:
+**Ejemplo:**
 
 ```
 aaron
@@ -189,7 +211,7 @@ Permite que cada usuario tenga su propia web:
 /home/usuario/public_html
 ```
 
-Activar el módulo:
+**Activar el módulo:**
 
 ```bash
 sudo a2enmod userdir
@@ -202,45 +224,19 @@ URL de acceso:
 http://host/~usuario
 ```
 
-# 10. VirtualHosts con Apache y FTP
-
-Crear un usuario para administrar un sitio:
-
-```bash
-sudo adduser web
-sudo mkdir -p /var/www/web
-sudo chown web:web /var/www/web
-```
-
-Crear VirtualHost:
-
-```conf
-<VirtualHost *:80>
-    ServerName www.web.daw
-    DocumentRoot /var/www/web
-</VirtualHost>
-```
-
-Añadir al `/etc/hosts`:
-
-```
-127.0.0.1   www.web.daw
-```
-
-
-# 11. Conexión Gráfica con FileZilla
+# 10. Conexión Gráfica con FileZilla
 
 FileZilla permite probar:
 
-✔ Usuario normal
-✔ Usuario enjaulado
-✔ Usuario anónimo
-✔ Conexión segura (SFTP)
+ - ✔ Usuario normal
+ - ✔ Usuario enjaulado
+ - ✔ Usuario anónimo
+ - ✔ Conexión segura (SFTP)
 
 Si el usuario está enjaulado, FileZilla mostrará `/` aunque realmente esté en `/home/usuario`.
 
 
-# 12. Conexión Segura con SFTP
+# 11. Conexión Segura con SFTP
 
 ```bash
 sftp usuario@servidor
@@ -253,7 +249,7 @@ Notas importantes:
 * Wireshark lo identifica como SSH, no como FTP.
 
 
-# 13. Enjaular Usuarios SFTP con SSH
+# 12. Enjaular Usuarios SFTP con SSH
 
 Editar `/etc/ssh/sshd_config`:
 
@@ -276,8 +272,9 @@ sudo chown root:root /home/nombreusuario
 * Crear carpeta interior para subir archivos:
 
 ```bash
-mkdir /home/nombreusuario/upload
-chmod 777 /home/nombreusuario/upload
+sudo mkdir /home/nombreusuario/upload
+sudo chown nombreusuario:nombreusuario /home/nombreusuario/upload
+sudo chmod 755 /home/nombreusuario/upload
 ```
 
 Reiniciar SSH:
@@ -286,49 +283,7 @@ Reiniciar SSH:
 sudo systemctl reload sshd
 ```
 
-
-# 14. Directivas Importantes de VSFTPD
-
-### 🔸 Autenticación
-
-```conf
-anonymous_enable
-local_enable
-pam_service_name
-```
-
-### 🔸 Escritura
-
-```conf
-write_enable
-local_umask
-anon_upload_enable
-```
-
-### 🔸 Modos de transferencia
-
-```conf
-pasv_enable
-pasv_min_port
-pasv_max_port
-```
-
-### 🔸 Seguridad y jaulas
-
-```conf
-chroot_local_user
-chroot_list_enable
-allow_writeable_chroot
-```
-
-### 🔸 Logs
-
-```conf
-xferlog_enable
-xferlog_file
-```
-
-# 15. Enlaces de Interés
+# 13. Enlaces de Interés
 
 * Directivas VSFTPD
   [http://vsftpd.beasts.org/vsftpd_conf.html](http://vsftpd.beasts.org/vsftpd_conf.html)
