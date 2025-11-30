@@ -1,6 +1,6 @@
 # [📘 Apuntes de FTP y VSFTPD](https://rxnwashere.github.io/rxnwashere_apuntes_ftp/)
 
-## 📑 Índice
+# 📑 Índice (corregido)
 
 1. [Introducción a FTP](#1-introducción-a-ftp)
 2. [Modos de Transferencia: Activo y Pasivo](#2-modos-de-transferencia-activo-y-pasivo)
@@ -8,13 +8,17 @@
 4. [Configuración General de VSFTPD](#4-configuración-general-de-vsftpd)
 5. [Forzar Modo Activo o Pasivo](#5-forzar-modo-activo-o-pasivo)
 6. [Usuarios Anónimos](#6-usuarios-anónimos)
-7. [Enjaular (Chroot) Usuarios FTP](#7-enjaular-chroot-usuarios-ftp)
-8. [Excepciones a la jaula (chroot_list)](#8-excepciones-a-la-jaula-chroot_list)
-9. [Userdir + Apache + FTP](#9-userdir--apache--ftp)
-10. [Conexión Gráfica con FileZilla](#10-conexión-gráfica-con-filezilla)
-11. [Conexión Segura con SFTP](#11-conexión-segura-con-sftp)
-12. [Enjaular Usuarios SFTP con SSH](#12-enjaular-usuarios-sftp-con-ssh)
-13. [Enlaces de Interés](#13-enlaces-de-interés)
+7. [Enjaular (Chroot) Usuarios FTP](#7-enjaular-usuarios-ftp)
+8. [Excepciones a la Jaula (chroot_list)](#8-excepciones-a-la-jaula-chroot_list)
+9. [Mensaje de Bienvenida Personalizado](#9-mensaje-de-bienvenida-personalizado)
+10. [Limitar Conexiones por Cliente o IP](#10-limitar-conexiones-por-cliente-o-ip)
+11. [Limitar Velocidad de Subida y Descarga](#11-limitar-velocidad-de-subida-y-descarga)
+12. [Userdir + Apache + FTP](#12-userdir--apache--ftp)
+13. [Conexión Gráfica con FileZilla](#13-conexión-gráfica-con-filezilla)
+14. [Conexión Segura con SFTP](#14-conexión-segura-con-sftp)
+15. [Enjaular Usuarios SFTP con SSH](#15-enjaular-usuarios-sftp-con-ssh)
+16. [Comandos Útiles](#16-comandos-útiles)
+17. [Enlaces de Interés](#17-enlaces-de-interés)
 
 # 1. Introducción a FTP
 
