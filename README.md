@@ -8,13 +8,17 @@
 4. [Configuración General de VSFTPD](#4-configuración-general-de-vsftpd)
 5. [Forzar Modo Activo o Pasivo](#5-forzar-modo-activo-o-pasivo)
 6. [Usuarios Anónimos](#6-usuarios-anónimos)
-7. [Enjaular (Chroot) Usuarios FTP](#7-enjaular-chroot-usuarios-ftp)
-8. [Excepciones a la jaula (chroot_list)](#8-excepciones-a-la-jaula-chroot_list)
-9. [Userdir + Apache + FTP](#9-userdir--apache--ftp)
-10. [Conexión Gráfica con FileZilla](#10-conexión-gráfica-con-filezilla)
-11. [Conexión Segura con SFTP](#11-conexión-segura-con-sftp)
-12. [Enjaular Usuarios SFTP con SSH](#12-enjaular-usuarios-sftp-con-ssh)
-13. [Enlaces de Interés](#13-enlaces-de-interés)
+7. [Enjaular (Chroot) Usuarios FTP](#7-enjaular-usuarios-ftp)
+8. [Excepciones a la Jaula (chroot_list)](#8-excepciones-a-la-jaula-chroot_list)
+9. [Mensaje de Bienvenida Personalizado](#9-mensaje-de-bienvenida-personalizado)
+10. [Limitar Conexiones por Cliente o IP](#10-limitar-conexiones-por-cliente-o-ip)
+11. [Limitar Velocidad de Subida y Descarga](#11-limitar-velocidad-de-subida-y-descarga)
+12. [Userdir + Apache + FTP](#12-userdir--apache--ftp)
+13. [Conexión Gráfica con FileZilla](#13-conexión-gráfica-con-filezilla)
+14. [Conexión Segura con SFTP](#14-conexión-segura-con-sftp)
+15. [Enjaular Usuarios SFTP con SSH](#15-enjaular-usuarios-sftp-con-ssh)
+16. [Comandos Útiles](#16-comandos-útiles)
+17. [Enlaces de Interés](#17-enlaces-de-interés)
 
 # 1. Introducción a FTP
 
@@ -116,6 +120,14 @@ Después de modificar:
 sudo systemctl reload vsftpd
 ```
 
+Consulta de logs:
+
+Los logs de vsftpd se encuentran en la siguiente ruta:
+
+```
+/var/log/vsftpd.log
+```
+
 # 5. Forzar Modo Activo o Pasivo
 
 ## 🔵 Forzar modo activo
@@ -134,6 +146,8 @@ pasv_max_port=10050
 ```
 
 Al configurar el modo pasivo podemos limitar los puertos que se utilizan, la única condición es que todos estén por encima del puerto 1024.
+
+También puedes cambiar entre modos con el comando **<code>passive</code>**, si está desactivado cambiará a modo pasivo y si está activo cambiará a activo. 
 
 # 6. Usuarios Anónimos
 
@@ -207,7 +221,43 @@ aaron
 
 Solo deben añadirse los nombres de los usuarios que no se quieren enjaular, no hayq que especificar nada más.
 
-# 9. Userdir + Apache + FTP
+# 9. Mensaje de bienvenida personalizado
+
+Con la directiva **<code>fptd_banner</code>** podemos personalizar el mensaje de bienvenida cuando los usuarios se conecten desde el cliente:
+
+```config
+ftpd_banner="Bienvenidos a mi servidor de FTP"
+```
+![Ejemplo de banner al conectarse](imgs/05.png)
+
+# 10. Limitar conexiones por cliente o por IP
+
+```config
+max_clients=6
+max_per_ip=3
+```
+
+En este ejemplo: **Máximo 6 clientes conectados** pero **ninguna IP puede tener más de 3 conexiones simultaneas**.
+
+# 11. Limitar velocidad de subida y descarga
+
+**Para usuarios locales**:
+
+```config
+local_max_rate=20480
+```
+
+En este ejemplo limitamos la velocidad de subida y descarga de los usuarios locales del sistema a 20 KB/s
+
+**Para usuario anónimos**:
+
+```config
+anon_max_rate=20480
+```
+
+Exactamente lo mismo pero con anónimos.
+
+# 12. Userdir + Apache + FTP
 
 Permite que cada usuario tenga su propia web:
 
@@ -238,7 +288,7 @@ ftp> put index.html
 http://host/~usuario
 ```
 
-# 10. Conexión Gráfica con FileZilla
+# 13. Conexión Gráfica con FileZilla
 
 FileZilla es un cliente de FTP que nos permite manejar el protocolo con una interfaz gráfica.
 
@@ -261,7 +311,7 @@ Cuando abramos FileZilla veremos los siguientes campos para conectarnos con el s
 
 En este caso nos hemos conectado con un usuario que no está enjaulado, por eso podemos ver todo el sistema de archivos del servidor.
 
-# 11. Conexión Segura con SFTP
+# 14. Conexión Segura con SFTP
 
 ```bash
 sftp usuario@servidor
@@ -273,7 +323,7 @@ Notas importantes:
 * Todo el tráfico va cifrado.
 * Si escaneamos la red con un sniffer (ej.: Wireshark) lo identifica como SSH, no como FTP.
 
-# 12. Enjaular Usuarios SFTP con SSH
+# 15. Enjaular Usuarios SFTP con SSH
 
 Editar `/etc/ssh/sshd_config`:
 
@@ -307,7 +357,13 @@ Reiniciar SSH:
 sudo systemctl reload sshd
 ```
 
-# 13. Enlaces de Interés
+# 16. Comandos útiles
+
+<code>ss -tlnp | grep :(puerto)</code> --> Muestra los procesos que escuchan el puerto especificado. Puede servirte para comprobar que FTP está escuchando por el puerto 21.
+
+<code>sudo watch "netstat -atunp | grep vsftpd"</code> --> Muestra en tiempo real los puertos abiertos por vsftpd.
+
+# 17. Enlaces de Interés
 
 * Directivas VSFTPD
   [http://vsftpd.beasts.org/vsftpd_conf.html](http://vsftpd.beasts.org/vsftpd_conf.html)

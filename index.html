@@ -365,7 +365,7 @@ code {
           : 'default'
     });
   </script>
-<h1 id="%F0%9F%93%98-apuntes-de-ftp-y-vsftpd">📘 Apuntes de FTP y VSFTPD</h1>
+<h1 id="%F0%9F%93%98-apuntes-de-ftp-y-vsftpd"><a href="https://rxnwashere.github.io/rxnwashere_apuntes_ftp/">📘 Apuntes de FTP y VSFTPD</a></h1>
 <h2 id="%F0%9F%93%91-%C3%ADndice">📑 Índice</h2>
 <ol>
 <li><a href="#1-introducci%C3%B3n-a-ftp">Introducción a FTP</a></li>
@@ -374,13 +374,17 @@ code {
 <li><a href="#4-configuraci%C3%B3n-general-de-vsftpd">Configuración General de VSFTPD</a></li>
 <li><a href="#5-forzar-modo-activo-o-pasivo">Forzar Modo Activo o Pasivo</a></li>
 <li><a href="#6-usuarios-an%C3%B3nimos">Usuarios Anónimos</a></li>
-<li><a href="#7-enjaular-chroot-usuarios-ftp">Enjaular (Chroot) Usuarios FTP</a></li>
-<li><a href="#8-excepciones-a-la-jaula-chroot_list">Excepciones a la Cárcel (chroot_list)</a></li>
-<li><a href="#9-userdir--apache--ftp">Userdir + Apache + FTP</a></li>
-<li><a href="#10-conexi%C3%B3n-gr%C3%A1fica-con-filezilla">Conexión Gráfica con FileZilla</a></li>
-<li><a href="#11-conexi%C3%B3n-segura-con-sftp">Conexión Segura con SFTP</a></li>
-<li><a href="#12-enjaular-usuarios-sftp-con-ssh">Enjaular Usuarios SFTP con SSH</a></li>
-<li><a href="#13-enlaces-de-inter%C3%A9s">Enlaces de Interés</a></li>
+<li><a href="#7-enjaular-usuarios-ftp">Enjaular (Chroot) Usuarios FTP</a></li>
+<li><a href="#8-excepciones-a-la-jaula-chroot_list">Excepciones a la Jaula (chroot_list)</a></li>
+<li><a href="#9-mensaje-de-bienvenida-personalizado">Mensaje de Bienvenida Personalizado</a></li>
+<li><a href="#10-limitar-conexiones-por-cliente-o-ip">Limitar Conexiones por Cliente o IP</a></li>
+<li><a href="#11-limitar-velocidad-de-subida-y-descarga">Limitar Velocidad de Subida y Descarga</a></li>
+<li><a href="#12-userdir--apache--ftp">Userdir + Apache + FTP</a></li>
+<li><a href="#13-conexi%C3%B3n-gr%C3%A1fica-con-filezilla">Conexión Gráfica con FileZilla</a></li>
+<li><a href="#14-conexi%C3%B3n-segura-con-sftp">Conexión Segura con SFTP</a></li>
+<li><a href="#15-enjaular-usuarios-sftp-con-ssh">Enjaular Usuarios SFTP con SSH</a></li>
+<li><a href="#16-comandos-%C3%BAtiles">Comandos Útiles</a></li>
+<li><a href="#17-enlaces-de-inter%C3%A9s">Enlaces de Interés</a></li>
 </ol>
 <h1 id="1-introducci%C3%B3n-a-ftp">1. Introducción a FTP</h1>
 <p>FTP (<strong>File Transfer Protocol</strong>) es uno de los protocolos más antiguos para transferir ficheros entre un cliente y un servidor.</p>
@@ -461,6 +465,10 @@ local_umask=022
 <p>Después de modificar:</p>
 <pre class="hljs"><code><div>sudo systemctl reload vsftpd
 </div></code></pre>
+<p>Consulta de logs:</p>
+<p>Los logs de vsftpd se encuentran en la siguiente ruta:</p>
+<pre class="hljs"><code><div>/var/log/vsftpd.log
+</div></code></pre>
 <h1 id="5-forzar-modo-activo-o-pasivo">5. Forzar Modo Activo o Pasivo</h1>
 <h2 id="%F0%9F%94%B5-forzar-modo-activo">🔵 Forzar modo activo</h2>
 <pre class="hljs"><code><div>pasv_enable=NO
@@ -472,6 +480,7 @@ pasv_min_port=10000
 pasv_max_port=10050
 </div></code></pre>
 <p>Al configurar el modo pasivo podemos limitar los puertos que se utilizan, la única condición es que todos estén por encima del puerto 1024.</p>
+<p>También puedes cambiar entre modos con el comando <strong><code>passive</code></strong>, si está desactivado cambiará a modo pasivo y si está activo cambiará a activo.</p>
 <h1 id="6-usuarios-an%C3%B3nimos">6. Usuarios Anónimos</h1>
 <h2 id="habilitar-acceso-an%C3%B3nimo">Habilitar acceso anónimo</h2>
 <pre class="hljs"><code><div>anonymous_enable=YES → Habilitem l’accés al servidor per a usuaris anònims.
@@ -489,7 +498,7 @@ sudo chmod 777 /srv/ftp/upload
 </div></code></pre>
 <p><strong>Aspecto importante</strong>:</p>
 <p>El propietario de la raiz del usuario anónimo por defecto es <strong>root</strong>, se puede cambiar con directivas pero es un agujero de seguridad, por lo tanto, si queremos que se puedan subir archivos a la raíz del usuario anónimo lo mejor es crear un directorio como hemos visto anteriormente.</p>
-<h1 id="7-enjaular-chroot-usuarios-ftp">7. Enjaular usuarios FTP</h1>
+<h1 id="7-enjaular-usuarios-ftp">7. Enjaular usuarios FTP</h1>
 <p>“Enjaular” significa que un usuario <strong>no puede salir de su /home</strong> y la ve como si fuera <code>/</code>.</p>
 <pre class="hljs"><code><div>chroot_local_user=YES
 </div></code></pre>
@@ -497,7 +506,7 @@ sudo chmod 777 /srv/ftp/upload
 <p><img src="imgs/03.png" alt="alt text"></p>
 <p><strong>Problema habitual:</strong></p>
 <p>El directorio home no puede ser escribible por seguridad, así que se debe crear una subcarpeta para subir archivos.</p>
-<h1 id="8-excepciones-a-la-jaula-chroot_list">8. Excepciones a la jaula (chroot_list)</h1>
+<h1 id="8-excepciones-a-la-jaula-chrootlist">8. Excepciones a la jaula (chroot_list)</h1>
 <p>Crear archivo (o editar si ya existe o ya se ha creado previamente):</p>
 <pre class="hljs"><code><div>/etc/vsftpd.chroot_list
 </div></code></pre>
@@ -511,7 +520,26 @@ chroot_list_file=/etc/vsftpd.chroot_list
 <pre class="hljs"><code><div>aaron
 </div></code></pre>
 <p>Solo deben añadirse los nombres de los usuarios que no se quieren enjaular, no hayq que especificar nada más.</p>
-<h1 id="9-userdir--apache--ftp">9. Userdir + Apache + FTP</h1>
+<h1 id="9-mensaje-de-bienvenida-personalizado">9. Mensaje de bienvenida personalizado</h1>
+<p>Con la directiva <strong><code>fptd_banner</code></strong> podemos personalizar el mensaje de bienvenida cuando los usuarios se conecten desde el cliente:</p>
+<pre class="hljs"><code><div>ftpd_banner=&quot;Bienvenidos a mi servidor de FTP&quot;
+</div></code></pre>
+<p><img src="imgs/05.png" alt="Ejemplo de banner al conectarse"></p>
+<h1 id="10-limitar-conexiones-por-cliente-o-por-ip">10. Limitar conexiones por cliente o por IP</h1>
+<pre class="hljs"><code><div>max_clients=6
+max_per_ip=3
+</div></code></pre>
+<p>En este ejemplo: <strong>Máximo 6 clientes conectados</strong> pero <strong>ninguna IP puede tener más de 3 conexiones simultaneas</strong>.</p>
+<h1 id="11-limitar-velocidad-de-subida-y-descarga">11. Limitar velocidad de subida y descarga</h1>
+<p><strong>Para usuarios locales</strong>:</p>
+<pre class="hljs"><code><div>local_max_rate=20480
+</div></code></pre>
+<p>En este ejemplo limitamos la velocidad de subida y descarga de los usuarios locales del sistema a 20 KB/s</p>
+<p><strong>Para usuario anónimos</strong>:</p>
+<pre class="hljs"><code><div>anon_max_rate=20480
+</div></code></pre>
+<p>Exactamente lo mismo pero con anónimos.</p>
+<h1 id="12-userdir--apache--ftp">12. Userdir + Apache + FTP</h1>
 <p>Permite que cada usuario tenga su propia web:</p>
 <pre class="hljs"><code><div>/home/usuario/public_html
 </div></code></pre>
@@ -527,7 +555,7 @@ sudo systemctl reload apache2
 <p><strong>URL de acceso</strong>:</p>
 <pre class="hljs"><code><div>http://host/~usuario
 </div></code></pre>
-<h1 id="10-conexi%C3%B3n-gr%C3%A1fica-con-filezilla">10. Conexión Gráfica con FileZilla</h1>
+<h1 id="13-conexi%C3%B3n-gr%C3%A1fica-con-filezilla">13. Conexión Gráfica con FileZilla</h1>
 <p>FileZilla es un cliente de FTP que nos permite manejar el protocolo con una interfaz gráfica.</p>
 <p>Para utilizarlo tenemos que instalarlo en la máquina cliente:</p>
 <pre class="hljs"><code><div>sudo apt install filezilla
@@ -542,7 +570,7 @@ sudo systemctl reload apache2
 <p><strong>Ejemplo de conexión con FileZilla</strong>:</p>
 <p><img src="imgs/04.png" alt="alt text"></p>
 <p>En este caso nos hemos conectado con un usuario que no está enjaulado, por eso podemos ver todo el sistema de archivos del servidor.</p>
-<h1 id="11-conexi%C3%B3n-segura-con-sftp">11. Conexión Segura con SFTP</h1>
+<h1 id="14-conexi%C3%B3n-segura-con-sftp">14. Conexión Segura con SFTP</h1>
 <pre class="hljs"><code><div>sftp usuario@servidor
 </div></code></pre>
 <p>Notas importantes:</p>
@@ -551,7 +579,7 @@ sudo systemctl reload apache2
 <li>Todo el tráfico va cifrado.</li>
 <li>Si escaneamos la red con un sniffer (ej.: Wireshark) lo identifica como SSH, no como FTP.</li>
 </ul>
-<h1 id="12-enjaular-usuarios-sftp-con-ssh">12. Enjaular Usuarios SFTP con SSH</h1>
+<h1 id="15-enjaular-usuarios-sftp-con-ssh">15. Enjaular Usuarios SFTP con SSH</h1>
 <p>Editar <code>/etc/ssh/sshd_config</code>:</p>
 <pre class="hljs"><code><div>Match User nombreusuario
     ChrootDirectory /home/nombreusuario
@@ -575,7 +603,10 @@ sudo chmod 755 /home/nombreusuario/upload
 <p>Reiniciar SSH:</p>
 <pre class="hljs"><code><div>sudo systemctl reload sshd
 </div></code></pre>
-<h1 id="13-enlaces-de-inter%C3%A9s">13. Enlaces de Interés</h1>
+<h1 id="16-comandos-%C3%BAtiles">16. Comandos útiles</h1>
+<p><code>ss -tlnp | grep :(puerto)</code> --&gt; Muestra los procesos que escuchan el puerto especificado. Puede servirte para comprobar que FTP está escuchando por el puerto 21.</p>
+<p><code>sudo watch &quot;netstat -atunp | grep vsftpd&quot;</code> --&gt; Muestra en tiempo real los puertos abiertos por vsftpd.</p>
+<h1 id="17-enlaces-de-inter%C3%A9s">17. Enlaces de Interés</h1>
 <ul>
 <li>
 <p>Directivas VSFTPD
