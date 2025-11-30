@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>📘 Apuntes de FTP y VSFTPD</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="%F0%9F%93%98-apuntes-de-ftp-y-vsftpd"><a href="https://rxnwashere.github.io/rxnwashere_apuntes_ftp/">📘 Apuntes de FTP y VSFTPD</a></h1>
+<h2 id="%F0%9F%93%91-%C3%ADndice">📑 Índice</h2>
+<ol>
+<li><a href="#1-introducci%C3%B3n-a-ftp">Introducción a FTP</a></li>
+<li><a href="#2-modos-de-transferencia-activo-y-pasivo">Modos de Transferencia: Activo y Pasivo</a></li>
+<li><a href="#3-instalaci%C3%B3n-y-funcionamiento-de-vsftpd">Instalación y Funcionamiento de VSFTPD</a></li>
+<li><a href="#4-configuraci%C3%B3n-general-de-vsftpd">Configuración General de VSFTPD</a></li>
+<li><a href="#5-forzar-modo-activo-o-pasivo">Forzar Modo Activo o Pasivo</a></li>
+<li><a href="#6-usuarios-an%C3%B3nimos">Usuarios Anónimos</a></li>
+<li><a href="#7-enjaular-usuarios-ftp">Enjaular (Chroot) Usuarios FTP</a></li>
+<li><a href="#8-excepciones-a-la-jaula-chroot_list">Excepciones a la Jaula (chroot_list)</a></li>
+<li><a href="#9-mensaje-de-bienvenida-personalizado">Mensaje de Bienvenida Personalizado</a></li>
+<li><a href="#10-limitar-conexiones-por-cliente-o-ip">Limitar Conexiones por Cliente o IP</a></li>
+<li><a href="#11-limitar-velocidad-de-subida-y-descarga">Limitar Velocidad de Subida y Descarga</a></li>
+<li><a href="#12-userdir--apache--ftp">Userdir + Apache + FTP</a></li>
+<li><a href="#13-conexi%C3%B3n-gr%C3%A1fica-con-filezilla">Conexión Gráfica con FileZilla</a></li>
+<li><a href="#14-conexi%C3%B3n-segura-con-sftp">Conexión Segura con SFTP</a></li>
+<li><a href="#15-enjaular-usuarios-sftp-con-ssh">Enjaular Usuarios SFTP con SSH</a></li>
+<li><a href="#16-comandos-%C3%BAtiles">Comandos Útiles</a></li>
+<li><a href="#17-enlaces-de-inter%C3%A9s">Enlaces de Interés</a></li>
+</ol>
+<h1 id="1-introducci%C3%B3n-a-ftp">1. Introducción a FTP</h1>
+<p>FTP (<strong>File Transfer Protocol</strong>) es uno de los protocolos más antiguos para transferir ficheros entre un cliente y un servidor.</p>
+<p>Características principales:</p>
+<ul>
+<li>
+<p><strong>No es seguro</strong>: el usuario y la contraseña viajan en texto plano.</p>
+</li>
+<li>
+<p>Usa <strong>dos canales</strong>:</p>
+<ul>
+<li>Canal <strong>de control</strong> (comandos)</li>
+<li>Canal <strong>de datos</strong> (transferencias)</li>
+</ul>
+</li>
+<li>
+<p>Funciona en <strong>modo activo</strong> o <strong>modo pasivo</strong></p>
+</li>
+</ul>
+<p>Se usa habitualmente para:</p>
+<ul>
+<li>✔ Servidores web</li>
+<li>✔ Servidores internos</li>
+<li>✔ Acceso rápido a carpetas de usuario</li>
+</ul>
+<h1 id="2-modos-de-transferencia-activo-y-pasivo">2. Modos de Transferencia: Activo y Pasivo</h1>
+<h3 id="%F0%9F%94%B5-modo-activo-port">🔵 Modo Activo (PORT)</h3>
+<ul>
+<li>Cliente se conecta al servidor por <strong>21 (control)</strong></li>
+<li>El servidor abre una conexión de datos desde <strong>el puerto 20</strong> hacia un puerto aleatorio del cliente</li>
+<li>Si el cliente está detrás de un firewall → <strong>suele fallar</strong></li>
+</ul>
+<p><strong>Ejemplo</strong>:</p>
+<p><img src="imgs/02.png" alt="get con modo activo"></p>
+<h3 id="%F0%9F%9F%A2-modo-pasivo-pasv">🟢 Modo Pasivo (PASV)</h3>
+<ul>
+<li>Cliente se conecta al servidor por <strong>21</strong></li>
+<li>El servidor le responde con un puerto aleatorio (&gt;1024)</li>
+<li>Es el modo recomendado.</li>
+</ul>
+<p><strong>Ejemplo</strong>:</p>
+<p><img src="imgs/01.png" alt="get con modo pasivo"></p>
+<h1 id="3-instalaci%C3%B3n-y-funcionamiento-de-vsftpd">3. Instalación y Funcionamiento de VSFTPD</h1>
+<pre class="hljs"><code><div>sudo apt install vsftpd
+sudo systemctl <span class="hljs-built_in">enable</span> --now vsftpd
+sudo systemctl status vsftpd
+</div></code></pre>
+<p><strong>Puertos típicos:</strong></p>
+<ul>
+<li><strong>21</strong> → Control</li>
+<li><strong>20</strong> → Datos en modo activo</li>
+<li><strong>&gt;1024</strong> → Datos en modo pasivo</li>
+</ul>
+<p><strong>Descarga y subida de archivos</strong>:</p>
+<p><code>get &lt;nombre/ruta-archivo&gt;</code> --&gt; Coge un archivo del servidor y lo descarga en el cliente.</p>
+<p><code>put &lt;nombre/ruta-archivo&gt;</code> --&gt; Envia un archivo desde el cliente hasta el servidor.</p>
+<p><strong>Entorno de los comandos</strong>:</p>
+<p>Otro aspecto a tener encuenta cuando utilizamos FTP es el entorno de los comandos, depende de como se escriban se ejecutaran en el lado del servidor o del cliente:</p>
+<ul>
+<li><code>!ls</code> --&gt; Esto se ejecuta en el cliente.</li>
+<li><code>ls</code> --&gt; Esto se ejecuta en el servidor.</li>
+</ul>
+<p>Con el carácter <code>!</code> podemos ejecutar comandos en el cliente mientras estamos conectados por FTP.</p>
+<p><strong>Excecpión</strong>:</p>
+<p>Esto no aplica para los comandos <code><strong>get</strong></code> y <code><strong>put</strong></code>.</p>
+<h1 id="4-configuraci%C3%B3n-general-de-vsftpd">4. Configuración General de VSFTPD</h1>
+<p>Archivo principal:</p>
+<pre class="hljs"><code><div>/etc/vsftpd.conf
+</div></code></pre>
+<p>Parámetros básicos:</p>
+<pre class="hljs"><code><div>listen=YES/NO
+listen_ipv6=YES/NO
+anonymous_enable=NO
+local_enable=YES
+write_enable=YES
+local_umask=022
+</div></code></pre>
+<p>Después de modificar:</p>
+<pre class="hljs"><code><div>sudo systemctl reload vsftpd
+</div></code></pre>
+<p>Consulta de logs:</p>
+<p>Los logs de vsftpd se encuentran en la siguiente ruta:</p>
+<pre class="hljs"><code><div>/var/log/vsftpd.log
+</div></code></pre>
+<h1 id="5-forzar-modo-activo-o-pasivo">5. Forzar Modo Activo o Pasivo</h1>
+<h2 id="%F0%9F%94%B5-forzar-modo-activo">🔵 Forzar modo activo</h2>
+<pre class="hljs"><code><div>pasv_enable=NO
+port_enable=YES
+</div></code></pre>
+<h2 id="%F0%9F%9F%A2-forzar-modo-pasivo-recomendado">🟢 Forzar modo pasivo (recomendado)</h2>
+<pre class="hljs"><code><div>pasv_enable=YES
+pasv_min_port=10000
+pasv_max_port=10050
+</div></code></pre>
+<p>Al configurar el modo pasivo podemos limitar los puertos que se utilizan, la única condición es que todos estén por encima del puerto 1024.</p>
+<p>También puedes cambiar entre modos con el comando <strong><code>passive</code></strong>, si está desactivado cambiará a modo pasivo y si está activo cambiará a activo.</p>
+<h1 id="6-usuarios-an%C3%B3nimos">6. Usuarios Anónimos</h1>
+<h2 id="habilitar-acceso-an%C3%B3nimo">Habilitar acceso anónimo</h2>
+<pre class="hljs"><code><div>anonymous_enable=YES → Habilitem l’accés al servidor per a usuaris anònims.
+write_enable=YES → Donem permisos d’escriptura, si no no deixa pujar fitxers.
+anon_mkdir_write_enable=NO → No li donem permisos per crear directoris.
+anon_upload_enable=YES → Li donem permisos per pujar fitxers.
+</div></code></pre>
+<p>La raíz por defecto del usuario anonymous es <strong><code>/srv/ftp</code></strong>.</p>
+<p>Para permitir subir archivos sin comprometer la seguridad:</p>
+<pre class="hljs"><code><div>sudo mkdir /srv/ftp/upload
+sudo chmod 777 /srv/ftp/upload
+</div></code></pre>
+<p>También puedes cambiar la home del usuario anónimo:</p>
+<pre class="hljs"><code><div>anon_root=/srv/ftp/public
+</div></code></pre>
+<p><strong>Aspecto importante</strong>:</p>
+<p>El propietario de la raiz del usuario anónimo por defecto es <strong>root</strong>, se puede cambiar con directivas pero es un agujero de seguridad, por lo tanto, si queremos que se puedan subir archivos a la raíz del usuario anónimo lo mejor es crear un directorio como hemos visto anteriormente.</p>
+<h1 id="7-enjaular-usuarios-ftp">7. Enjaular usuarios FTP</h1>
+<p>“Enjaular” significa que un usuario <strong>no puede salir de su /home</strong> y la ve como si fuera <code>/</code>.</p>
+<pre class="hljs"><code><div>chroot_local_user=YES
+</div></code></pre>
+<p><strong>Ejemplo</strong>:</p>
+<p><img src="imgs/03.png" alt="alt text"></p>
+<p><strong>Problema habitual:</strong></p>
+<p>El directorio home no puede ser escribible por seguridad, así que se debe crear una subcarpeta para subir archivos.</p>
+<h1 id="8-excepciones-a-la-jaula-chrootlist">8. Excepciones a la jaula (chroot_list)</h1>
+<p>Crear archivo (o editar si ya existe o ya se ha creado previamente):</p>
+<pre class="hljs"><code><div>/etc/vsftpd.chroot_list
+</div></code></pre>
+<p>Configurar:</p>
+<pre class="hljs"><code><div>chroot_local_user=YES
+chroot_list_enable=YES
+chroot_list_file=/etc/vsftpd.chroot_list
+</div></code></pre>
+<p>Los usuarios listados en este archivo <strong>NO estarán enjaulados</strong>.</p>
+<p><strong>Ejemplo:</strong></p>
+<pre class="hljs"><code><div>aaron
+</div></code></pre>
+<p>Solo deben añadirse los nombres de los usuarios que no se quieren enjaular, no hayq que especificar nada más.</p>
+<h1 id="9-mensaje-de-bienvenida-personalizado">9. Mensaje de bienvenida personalizado</h1>
+<p>Con la directiva <strong><code>fptd_banner</code></strong> podemos personalizar el mensaje de bienvenida cuando los usuarios se conecten desde el cliente:</p>
+<pre class="hljs"><code><div>ftpd_banner=&quot;Bienvenidos a mi servidor de FTP&quot;
+</div></code></pre>
+<p><img src="imgs/05.png" alt="Ejemplo de banner al conectarse"></p>
+<h1 id="10-limitar-conexiones-por-cliente-o-por-ip">10. Limitar conexiones por cliente o por IP</h1>
+<pre class="hljs"><code><div>max_clients=6
+max_per_ip=3
+</div></code></pre>
+<p>En este ejemplo: <strong>Máximo 6 clientes conectados</strong> pero <strong>ninguna IP puede tener más de 3 conexiones simultaneas</strong>.</p>
+<h1 id="11-limitar-velocidad-de-subida-y-descarga">11. Limitar velocidad de subida y descarga</h1>
+<p><strong>Para usuarios locales</strong>:</p>
+<pre class="hljs"><code><div>local_max_rate=20480
+</div></code></pre>
+<p>En este ejemplo limitamos la velocidad de subida y descarga de los usuarios locales del sistema a 20 KB/s</p>
+<p><strong>Para usuario anónimos</strong>:</p>
+<pre class="hljs"><code><div>anon_max_rate=20480
+</div></code></pre>
+<p>Exactamente lo mismo pero con anónimos.</p>
+<h1 id="12-userdir--apache--ftp">12. Userdir + Apache + FTP</h1>
+<p>Permite que cada usuario tenga su propia web:</p>
+<pre class="hljs"><code><div>/home/usuario/public_html
+</div></code></pre>
+<p><strong>Activar el módulo:</strong></p>
+<pre class="hljs"><code><div>sudo a2enmod userdir
+sudo systemctl reload apache2
+</div></code></pre>
+<p><strong>Crear archivo <code>index.html</code> y subirlo</strong>:</p>
+<pre class="hljs"><code><div><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Bienvenido a user dir<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+</div></code></pre>
+<pre class="hljs"><code><div>ftp&gt; put index.html
+</div></code></pre>
+<p><strong>URL de acceso</strong>:</p>
+<pre class="hljs"><code><div>http://host/~usuario
+</div></code></pre>
+<h1 id="13-conexi%C3%B3n-gr%C3%A1fica-con-filezilla">13. Conexión Gráfica con FileZilla</h1>
+<p>FileZilla es un cliente de FTP que nos permite manejar el protocolo con una interfaz gráfica.</p>
+<p>Para utilizarlo tenemos que instalarlo en la máquina cliente:</p>
+<pre class="hljs"><code><div>sudo apt install filezilla
+</div></code></pre>
+<p>Cuando abramos FileZilla veremos los siguientes campos para conectarnos con el servidor:</p>
+<ul>
+<li>Servidor (IP del servidor a conectarnos)</li>
+<li>Nombre de usuario (Nombre de usuario existente en el servidor)</li>
+<li>Contraseña (Contraseña del usuario)</li>
+<li>Puerto (Puedes especificar un puerto si lo deseas, por defecto usa el 21 y para SFTP puedes utilizar el 22).</li>
+</ul>
+<p><strong>Ejemplo de conexión con FileZilla</strong>:</p>
+<p><img src="imgs/04.png" alt="alt text"></p>
+<p>En este caso nos hemos conectado con un usuario que no está enjaulado, por eso podemos ver todo el sistema de archivos del servidor.</p>
+<h1 id="14-conexi%C3%B3n-segura-con-sftp">14. Conexión Segura con SFTP</h1>
+<pre class="hljs"><code><div>sftp usuario@servidor
+</div></code></pre>
+<p>Notas importantes:</p>
+<ul>
+<li><strong>No usa FTP</strong>, sino SSH.</li>
+<li>Todo el tráfico va cifrado.</li>
+<li>Si escaneamos la red con un sniffer (ej.: Wireshark) lo identifica como SSH, no como FTP.</li>
+</ul>
+<h1 id="15-enjaular-usuarios-sftp-con-ssh">15. Enjaular Usuarios SFTP con SSH</h1>
+<p>Editar <code>/etc/ssh/sshd_config</code>:</p>
+<pre class="hljs"><code><div>Match User nombreusuario
+    ChrootDirectory /home/nombreusuario
+    ForceCommand internal-sftp
+    X11Forwarding no
+    AllowTcpForwarding no
+</div></code></pre>
+<p>Requisitos:</p>
+<ul>
+<li>El directorio raíz debe ser propiedad de root:</li>
+</ul>
+<pre class="hljs"><code><div>sudo chown root:root /home/nombreusuario
+</div></code></pre>
+<ul>
+<li>Crear carpeta interior para subir archivos:</li>
+</ul>
+<pre class="hljs"><code><div>sudo mkdir /home/nombreusuario/upload
+sudo chown nombreusuario:nombreusuario /home/nombreusuario/upload
+sudo chmod 755 /home/nombreusuario/upload
+</div></code></pre>
+<p>Reiniciar SSH:</p>
+<pre class="hljs"><code><div>sudo systemctl reload sshd
+</div></code></pre>
+<h1 id="16-comandos-%C3%BAtiles">16. Comandos útiles</h1>
+<p><code>ss -tlnp | grep :(puerto)</code> --&gt; Muestra los procesos que escuchan el puerto especificado. Puede servirte para comprobar que FTP está escuchando por el puerto 21.</p>
+<p><code>sudo watch &quot;netstat -atunp | grep vsftpd&quot;</code> --&gt; Muestra en tiempo real los puertos abiertos por vsftpd.</p>
+<h1 id="17-enlaces-de-inter%C3%A9s">17. Enlaces de Interés</h1>
+<ul>
+<li>
+<p>Directivas VSFTPD
+<a href="http://vsftpd.beasts.org/vsftpd_conf.html">http://vsftpd.beasts.org/vsftpd_conf.html</a></p>
+</li>
+<li>
+<p>Administración de usuarios y grupos
+<a href="http://www.ite.educacion.es/formacion/materiales/85/cd/linux/m1/administracin_de_usuarios_y_grupos.html">http://www.ite.educacion.es/formacion/materiales/85/cd/linux/m1/administracin_de_usuarios_y_grupos.html</a></p>
+</li>
+<li>
+<p>Userdir en Apache
+<a href="https://www.evaristogz.com/configurar-userdir-automatico-apache2/">https://www.evaristogz.com/configurar-userdir-automatico-apache2/</a></p>
+</li>
+</ul>
+<hr>
+<p><code>Hecho por Aarón Cano (<a href="https://github.com/rxnwashere">rxnwashere</a>)</code></p>
+
+</body>
+</html>
