@@ -120,8 +120,8 @@ Consulta de logs:
 
 Los logs de vsftpd se encuentran en la siguiente ruta:
 
-```bash
-
+```
+/var/log/vsftpd.log
 ```
 
 # 5. Forzar Modo Activo o Pasivo
@@ -217,7 +217,20 @@ Solo deben añadirse los nombres de los usuarios que no se quieren enjaular, no 
 
 # 9. Mensaje de bienvenida personalizado
 
+Con la directiva **<code>fptd_banner</code>** podemos personalizar el mensaje de bienvenida cuando los usuarios se conecten desde el cliente:
 
+```config
+ftpd_banner="Bienvenidos a mi servidor de FTP"
+```
+
+# 10. Limitar conexiones por cliente o por IP
+
+```config
+max_clients=6
+max_per_ip=3
+```
+
+En este ejemplo: **Máximo 6 clientes conectados** pero **ninguna IP puede tener más de 3 conexiones simultaneas**.
 
 # 1X. Userdir + Apache + FTP
 
